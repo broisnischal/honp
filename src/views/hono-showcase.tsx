@@ -9,7 +9,11 @@ type HonoShowcaseProps = {
   links: PageLink[];
 };
 
-export const HonoShowcase = ({ title, description, links }: HonoShowcaseProps) => {
+export const HonoShowcase = ({
+  title,
+  description,
+  links,
+}: HonoShowcaseProps) => {
   return (
     <html>
       <head>
@@ -17,7 +21,15 @@ export const HonoShowcase = ({ title, description, links }: HonoShowcaseProps) =
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <title>{title}</title>
       </head>
-      <body style="font-family: ui-sans-serif, system-ui; max-width: 860px; margin: 40px auto; padding: 0 16px; line-height: 1.6;">
+      <body
+        style={{
+          fontFamily: "ui-sans-serif, system-ui",
+          maxWidth: 860,
+          margin: "40px auto",
+          padding: "0 16px",
+          lineHeight: 1.6,
+        }}
+      >
         <h1>{title}</h1>
         <p>{description}</p>
         <ul>

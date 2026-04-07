@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "payment-app",
-  "main": "src/index.ts",
+  "main": "workers/app.ts",
   "compatibility_date": "2026-04-07",
   "compatibility_flags": ["nodejs_compat"],
   "d1_databases": [
