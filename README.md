@@ -11,14 +11,15 @@ A modern Cloudflare Workers starter with:
 ## Quick Start
 
 ```bash
-npm install
+bun install
 cp .dev.vars.example .dev.vars
-npm run dev
+bun run dev
 ```
 
 Open:
 
 - `http://127.0.0.1:5173/`
+- `http://127.0.0.1:5173/auth`
 - `http://127.0.0.1:5173/react-ssr`
 - `http://127.0.0.1:5173/api/health`
 
@@ -27,7 +28,7 @@ Open:
 1. Create D1 database:
 
 ```bash
-npm run db:create
+bun run db:create
 ```
 
 2. Put returned IDs in `wrangler.jsonc`:
@@ -38,10 +39,10 @@ npm run db:create
 3. Generate and apply schema:
 
 ```bash
-npm run db:generate
-npm run db:migrate:local
+bun run db:generate
+bun run db:migrate:local
 # then for real environment
-npm run db:migrate:remote
+bun run db:migrate:remote
 ```
 
 ## Local Auth Config
@@ -61,21 +62,21 @@ Auth endpoints are mounted at:
 
 ## Scripts
 
-- `npm run dev` - local dev with Vite + Hono CF adapter
-- `npm run dev:wrangler` - run worker with Wrangler directly
-- `npm run typecheck` - TypeScript check
-- `npm run build` - production build (`dist/_worker.js`)
-- `npm run deploy` - build + Cloudflare deploy
-- `npm run db:generate` - generate Drizzle SQL migrations
-- `npm run db:migrate:local` - apply migrations to local D1
-- `npm run db:migrate:remote` - apply migrations to remote D1
-- `npm run db:studio` - launch Drizzle Studio
-- `npm run cf-typegen` - regenerate Cloudflare binding types
+- `bun run dev` - local dev with Vite + Hono CF adapter
+- `bun run dev:wrangler` - run worker with Wrangler directly
+- `bun run typecheck` - TypeScript check
+- `bun run build` - production build (`dist/_worker.js`)
+- `bun run deploy` - build + Cloudflare deploy
+- `bun run db:generate` - generate Drizzle SQL migrations
+- `bun run db:migrate:local` - apply migrations to local D1
+- `bun run db:migrate:remote` - apply migrations to remote D1
+- `bun run db:studio` - launch Drizzle Studio
+- `bun run cf-typegen` - regenerate Cloudflare binding types
 
 ## Deploy
 
 ```bash
-npm run deploy
+bun run deploy
 ```
 
 This deploys `dist/_worker.js` through Wrangler.

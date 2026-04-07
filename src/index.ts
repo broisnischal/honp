@@ -4,6 +4,7 @@ import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 
 import { createAuth } from "./lib/auth";
+import { AuthPage, type SessionShape } from "./views/auth-page";
 import { HonoShowcase } from "./views/hono-showcase";
 import { ReactAuthPanel } from "./views/react-auth-panel";
 
@@ -22,12 +23,48 @@ app.get("/", (c) => {
       title: "Hono Worker Template",
       description: "Hono + Cloudflare Workers + D1 + Drizzle + Better Auth + React SSR",
       links: [
+        { href: "/auth", label: "Auth page (React state + client render)" },
         { href: "/react-ssr", label: "SSR page (React renderToString)" },
         { href: "/api/health", label: "Health endpoint" },
         { href: "/api/session", label: "Current Better Auth session" },
       ],
     }),
   );
+});
+
+app.get("/auth", async (c) => {
+  const auth = createAuth(c.env, c.req.url);
+  const serverSession = (await auth.api.getSession({
+    headers: c.req.raw.headers,
+  })) as SessionShape;
+
+  const markup = renderToString(
+    createElement(AuthPage, {
+      signUpApiPath: "/api/auth/sign-up/email",
+      signInApiPath: "/api/auth/sign-in/email",
+      signOutApiPath: "/api/auth/sign-out",
+      sessionApiPath: "/api/session",
+      initialSession: serverSession ?? null,
+    }),
+  );
+  const safeConfig = JSON.stringify({
+    initialSession: serverSession ?? null,
+  }).replaceAll("<", "\\u003c");
+
+  return c.html(`<!doctype html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link href="/src/styles.css" rel="stylesheet" />
+      <title>Auth</title>
+    </head>
+    <body class="bg-white text-slate-900">
+      <div id="root">${markup}</div>
+      <script>window.__AUTH_PAGE_CONFIG__=${safeConfig};</script>
+      <script type="module" src="/src/auth-hydrate.tsx"></script>
+    </body>
+  </html>`);
 });
 
 app.get("/hono-jsx", (c) => {
@@ -54,7 +91,16 @@ app.get("/react-ssr", (c) => {
     }),
   );
 
-  return c.html(`<!doctype html><html><body>${markup}</body></html>`);
+  return c.html(`<!doctype html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link href="/src/styles.css" rel="stylesheet" />
+      <title>React SSR</title>
+    </head>
+    <body class="bg-white text-slate-900">${markup}</body>
+  </html>`);
 });
 
 app.on(["GET", "POST"], "/api/auth/*", async (c) => {
