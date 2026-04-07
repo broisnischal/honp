@@ -1,63 +1,41 @@
-type UpFetchOptions = Omit<RequestInit, "body" | "headers"> & {
-  body?: unknown;
-  headers?: Record<string, string>;
-};
+import { up } from "up-fetch";
 
-type UpFetchResult<T> = {
+/**
+ * Better Auth parses the request body as JSON when `Content-Type: application/json`
+ * is present. POST + that header + empty body → "Unexpected end of JSON input".
+ *
+ * Defaults: `Accept: application/json` only. JSON `Content-Type` and body are set by
+ * up-fetch when you pass a serializable `body` (e.g. `{}` for sign-out).
+ */
+export type UpFetchResult<T = unknown> = {
   response: Response;
+  data: T | null;
   text: string;
-  json: T | null;
 };
 
-const hasBodyMethod = (method?: string) => {
-  if (!method) {
-    return false;
-  }
-
-  return method !== "GET" && method !== "HEAD";
-};
-
-export const upFetch = async <T = unknown>(
-  path: string,
-  options: UpFetchOptions = {},
-): Promise<UpFetchResult<T>> => {
-  const method = options.method?.toUpperCase();
-  const headers = new Headers(options.headers);
-
-  if (!headers.has("accept")) {
-    headers.set("accept", "application/json");
-  }
-
-  const shouldSendJson = options.body !== undefined || hasBodyMethod(method);
-
-  if (shouldSendJson && !headers.has("content-type")) {
-    headers.set("content-type", "application/json");
-  }
-
-  const body =
-    options.body === undefined
-      ? shouldSendJson
-        ? "{}"
-        : undefined
-      : typeof options.body === "string"
-        ? options.body
-        : JSON.stringify(options.body);
-
-  const response = await fetch(path, {
-    ...options,
-    headers,
-    body,
-  });
-  const text = await response.text();
-
-  let json: T | null = null;
-  if (text) {
-    try {
-      json = JSON.parse(text) as T;
-    } catch {
-      json = null;
+const rawUpfetch = up(fetch, () => ({
+  headers: {
+    accept: "application/json",
+  },
+  reject: () => false,
+  parseResponse: async (response: Response): Promise<UpFetchResult<unknown>> => {
+    const text = await response.text();
+    let data: unknown = null;
+    if (text) {
+      try {
+        data = JSON.parse(text) as unknown;
+      } catch {
+        data = null;
+      }
     }
-  }
+    return { response, data, text };
+  },
+}));
 
-  return { response, text, json };
-};
+export async function upfetch<T = unknown>(
+  input: string | URL,
+  init?: Parameters<typeof rawUpfetch>[1],
+): Promise<UpFetchResult<T>> {
+  const result = (await rawUpfetch(input, init)) as UpFetchResult<T>;
+  return result;
+}

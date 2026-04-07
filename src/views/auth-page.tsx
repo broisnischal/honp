@@ -2,7 +2,7 @@
 import { FormEvent, useMemo, useState } from "react";
 
 import { Button } from "../components/ui/button";
-import { upFetch } from "../lib/up-fetch";
+import { upfetch } from "../lib/up-fetch";
 
 type AuthPageProps = {
   signUpApiPath: string;
@@ -45,8 +45,8 @@ export const AuthPage = ({
     setLoading(true);
     setMessage("Loading session...");
     try {
-      const { response, json } = await upFetch<SessionShape>(sessionApiPath);
-      setSession((json as SessionShape) ?? null);
+      const { response, data } = await upfetch<SessionShape>(sessionApiPath);
+      setSession(data ?? null);
       setMessage(response.ok ? "Session loaded" : "Session request failed");
     } catch {
       setMessage("Session request failed");
@@ -65,7 +65,7 @@ export const AuthPage = ({
         payload.name = name || email.split("@")[0] || "user";
       }
 
-      const { response, text } = await upFetch(submitPath, {
+      const { response, text } = await upfetch(submitPath, {
         method: "POST",
         body: payload,
       });
@@ -88,8 +88,9 @@ export const AuthPage = ({
     setLoading(true);
     setMessage("Signing out...");
     try {
-      const { response } = await upFetch(signOutApiPath, {
+      const { response } = await upfetch(signOutApiPath, {
         method: "POST",
+        body: {},
       });
       setMessage(response.ok ? "Signed out" : "Sign out failed");
       setSession(null);
@@ -109,28 +110,43 @@ export const AuthPage = ({
         </p>
 
         <div className="mt-5 flex flex-wrap gap-2">
-          <Button disabled={loading} onClick={() => setMode("sign-in")} type="button" variant="outline">
-          Sign in
+          <Button
+            disabled={loading}
+            onClick={() => setMode("sign-in")}
+            type="button"
+            variant="outline"
+          >
+            Sign in
           </Button>
-          <Button disabled={loading} onClick={() => setMode("sign-up")} type="button" variant="outline">
-          Sign up
+          <Button
+            disabled={loading}
+            onClick={() => setMode("sign-up")}
+            type="button"
+            variant="outline"
+          >
+            Sign up
           </Button>
-          <Button disabled={loading} onClick={loadSession} type="button" variant="ghost">
-          Refresh session
+          <Button
+            disabled={loading}
+            onClick={loadSession}
+            type="button"
+            variant="ghost"
+          >
+            Refresh session
           </Button>
         </div>
 
         <form className="mt-5 grid gap-3" onSubmit={submit}>
           {mode === "sign-up" ? (
             <label className="grid gap-1 text-sm">
-            Name
-            <input
-              autoComplete="name"
-              className="h-10 rounded-md border border-slate-200 px-3"
-              onInput={(e) => setName((e.target as HTMLInputElement).value)}
-              required
-              value={name}
-            />
+              Name
+              <input
+                autoComplete="name"
+                className="h-10 rounded-md border border-slate-200 px-3"
+                onInput={(e) => setName((e.target as HTMLInputElement).value)}
+                required
+                value={name}
+              />
             </label>
           ) : null}
           <label className="grid gap-1 text-sm">
@@ -147,7 +163,9 @@ export const AuthPage = ({
           <label className="grid gap-1 text-sm">
             Password
             <input
-              autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
+              autoComplete={
+                mode === "sign-up" ? "new-password" : "current-password"
+              }
               className="h-10 rounded-md border border-slate-200 px-3"
               minLength={8}
               onInput={(e) => setPassword((e.target as HTMLInputElement).value)}
@@ -157,12 +175,21 @@ export const AuthPage = ({
             />
           </label>
           <Button disabled={loading} type="submit">
-            {loading ? "Working..." : mode === "sign-up" ? "Create account" : "Sign in"}
+            {loading
+              ? "Working..."
+              : mode === "sign-up"
+                ? "Create account"
+                : "Sign in"}
           </Button>
         </form>
 
         <div className="mt-4">
-          <Button disabled={loading} onClick={signOut} type="button" variant="outline">
+          <Button
+            disabled={loading}
+            onClick={signOut}
+            type="button"
+            variant="outline"
+          >
             Sign out
           </Button>
         </div>
@@ -175,7 +202,10 @@ export const AuthPage = ({
           {JSON.stringify(session, null, 2)}
         </pre>
 
-        <a className="mt-4 inline-block text-sm text-slate-700 underline" href="/">
+        <a
+          className="mt-4 inline-block text-sm text-slate-700 underline"
+          href="/"
+        >
           Back to home
         </a>
       </section>
